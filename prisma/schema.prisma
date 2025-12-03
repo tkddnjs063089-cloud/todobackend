@@ -1,0 +1,33 @@
+// Prisma 6 Schema
+// DBeaver와 연동할 데이터베이스 설정
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // DBeaver에서 사용하는 DB에 맞게 변경하세요 (mysql, sqlite, sqlserver 등)
+  url      = env("DATABASE_URL")
+}
+
+// 메인 Todo 모델
+model Todo {
+  id        String    @id @default(uuid())
+  text      String
+  completed Boolean   @default(false)
+  date      String?   // YYYY-MM-DD 형식 또는 null
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  subTodos  SubTodo[]
+}
+
+// 서브 Todo 모델
+model SubTodo {
+  id        String   @id @default(uuid())
+  text      String
+  completed Boolean  @default(false)
+  todoId    String
+  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
