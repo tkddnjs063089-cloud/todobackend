@@ -1,8 +1,8 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import routes from "./routes";
-import { errorHandler, notFoundHandler } from "./middlewares";
+import routes from "./routes/index.js";
+import { errorHandler, notFoundHandler } from "./middlewares/index.js";
 
 // 환경 변수 로드
 dotenv.config();

@@ -1,3 +1,2 @@
-export * from "./validate.middleware";
-export * from "./error.middleware";
-
+export * from "./validate.middleware.js";
+export * from "./error.middleware.js";

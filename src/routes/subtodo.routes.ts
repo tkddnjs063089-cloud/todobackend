@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { createSubTodo, updateSubTodo, deleteSubTodo } from "../controllers";
-import { validateBody, validateParams } from "../middlewares";
-import { createSubTodoSchema, updateSubTodoSchema, idParamSchema, subTodoIdParamSchema } from "../schemas";
+import { createSubTodo, updateSubTodo, deleteSubTodo } from "../controllers/index.js";
+import { validateBody, validateParams } from "../middlewares/index.js";
+import { createSubTodoSchema, updateSubTodoSchema, idParamSchema, subTodoIdParamSchema } from "../schemas/index.js";
 
 const router = Router();
 

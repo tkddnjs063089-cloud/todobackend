@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getTrash, restoreTodo, restoreSubTodo, permanentDeleteTodo, permanentDeleteSubTodo, emptyTrash } from "../controllers";
+import { getTrash, restoreTodo, restoreSubTodo, permanentDeleteTodo, permanentDeleteSubTodo, emptyTrash } from "../controllers/index.js";
 
 const router = Router();
 
