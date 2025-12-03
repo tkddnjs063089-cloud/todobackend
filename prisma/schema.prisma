@@ -16,6 +16,7 @@ model Todo {
   text      String
   completed Boolean   @default(false)
   date      String?   // YYYY-MM-DD 형식 또는 null
+  deletedAt DateTime? // Soft Delete - null이면 삭제 안 됨
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   subTodos  SubTodo[]
@@ -23,11 +24,12 @@ model Todo {
 
 // 서브 Todo 모델
 model SubTodo {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   text      String
-  completed Boolean  @default(false)
+  completed Boolean   @default(false)
+  deletedAt DateTime? // Soft Delete
   todoId    String
-  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  todo      Todo      @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }

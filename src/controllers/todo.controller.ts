@@ -5,11 +5,16 @@ const prisma = new PrismaClient();
 
 // ==================== 메인 Todo CRUD ====================
 
-// 모든 Todo 조회 (서브 Todo 포함)
+// 모든 Todo 조회 (서브 Todo 포함) - 삭제되지 않은 것만
 export const getAllTodos = async (req: Request, res: Response) => {
   try {
     const todos = await prisma.todo.findMany({
-      include: { subTodos: true },
+      where: { deletedAt: null }, // Soft Delete 필터
+      include: {
+        subTodos: {
+          where: { deletedAt: null }, // SubTodo도 삭제 안 된 것만
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -183,26 +188,36 @@ export const updateTodo = async (req: Request, res: Response) => {
   }
 };
 
-// Todo 삭제
+// Todo 삭제 (Soft Delete - 휴지통으로 이동)
 export const deleteTodo = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
     // 존재 여부 확인
     const existingTodo = await prisma.todo.findUnique({ where: { id } });
-    if (!existingTodo) {
+    if (!existingTodo || existingTodo.deletedAt) {
       return res.status(404).json({
         success: false,
         message: "할 일을 찾을 수 없습니다",
       });
     }
 
-    // Cascade로 서브 Todo도 함께 삭제됨
-    await prisma.todo.delete({ where: { id } });
+    // Soft Delete - deletedAt에 현재 시간 기록
+    const now = new Date();
+    await prisma.todo.update({
+      where: { id },
+      data: { deletedAt: now },
+    });
+
+    // SubTodo들도 함께 Soft Delete
+    await prisma.subTodo.updateMany({
+      where: { todoId: id },
+      data: { deletedAt: now },
+    });
 
     res.json({
       success: true,
-      message: "할 일이 삭제되었습니다",
+      message: "할 일이 휴지통으로 이동되었습니다",
     });
   } catch (error) {
     console.error("deleteTodo error:", error);
@@ -312,14 +327,14 @@ export const updateSubTodo = async (req: Request, res: Response) => {
   }
 };
 
-// 서브 Todo 삭제
+// 서브 Todo 삭제 (Soft Delete)
 export const deleteSubTodo = async (req: Request, res: Response) => {
   try {
     const { id, subId } = req.params;
 
     // 서브 Todo 존재 여부 확인
     const existingSubTodo = await prisma.subTodo.findFirst({
-      where: { id: subId, todoId: id },
+      where: { id: subId, todoId: id, deletedAt: null },
     });
 
     if (!existingSubTodo) {
@@ -329,11 +344,15 @@ export const deleteSubTodo = async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.subTodo.delete({ where: { id: subId } });
+    // Soft Delete
+    await prisma.subTodo.update({
+      where: { id: subId },
+      data: { deletedAt: new Date() },
+    });
 
     res.json({
       success: true,
-      message: "서브 할 일이 삭제되었습니다",
+      message: "서브 할 일이 휴지통으로 이동되었습니다",
     });
   } catch (error) {
     console.error("deleteSubTodo error:", error);
@@ -343,4 +362,3 @@ export const deleteSubTodo = async (req: Request, res: Response) => {
     });
   }
 };
-
